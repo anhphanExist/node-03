@@ -5,8 +5,8 @@ async function get(request, response) {
         const id = request.params.id;
         const todo = await TodoObject.findById(id).lean();
         response.send({
-            data: todo,
             success: true,
+            data: todo
         });
     } catch (err) {
         response.send({
@@ -52,7 +52,7 @@ async function updateTitleOnly(request, response) {
     try {
         const id = request.params.id;
         const todo = await TodoObject.findByIdAndUpdate(
-            {id},
+            id,
             {$set: {
                 title: newTitle
             }},
@@ -74,12 +74,13 @@ async function updateTitleOnly(request, response) {
 async function updateStatusOnly(request, response) {
     try {
         const id = request.params.id;
-        const todo = await TodoObject.findByIdAndUpdate(
-            {id},
-            {$set: {
+        var todo = await TodoObject.findById(id).lean();
+        const completed = todo.completed;
+        await TodoObject.updateOne(
+            todo,
+            {$set:{
                 completed: !completed
-                }},
-            {new: true}
+            }}
         );
         response.send({
             success: true,
