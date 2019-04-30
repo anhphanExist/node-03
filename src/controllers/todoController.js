@@ -1,23 +1,127 @@
-const todoObject = require("../models/TodoObject");
+const TodoObject = require("../models/TodoObject");
 
-function get(request, response) {
+async function get(request, response) {
+    const id = request.params.id;
+
+    const todo = await TodoObject.findOne({_id: id}).lean();
+    if (!todo) {
+        return response.send({
+            success: false,
+            message: "TodoObject not found."
+        });
+    }
+
+    response.send({
+        data: todo,
+        success: true,
+    });
 
 }
 
-function list(request, response) {
+async function list(request, response) {
+    const {page, limit} = request.query;
+    const p = page ? parseInt(page, 10) : 1;
+    const l = limit ? parseInt(limit, 10) : 10;
+    const skip = (p - 1) * l;
 
+    const todoList = await TodoObject.find({})
+        .skip(skip)
+        .limit(l)
+        .sort({
+            created: -1
+        })
+        .lean();
+
+    response.send(todoList);
 }
 
-function create(request, response) {
+async function create(request, response) {
+    const {title} = request.body;
 
+    if (!title) {
+        return response.send({
+            success: false,
+            message: "Title must be not empty."
+        });
+    }
+
+    try {
+        const todo = new TodoObject({
+            title: "Hello"
+        });
+
+        const doc = await todo.save();
+
+        return response.send({
+            data: doc.toJSON(),
+            success: true
+        });
+    } catch (err) {
+        response.send({
+            success: false,
+            message: err.message,
+        });
+    }
 }
 
-function update(request, response) {
+async function update(request, response) {
+    const title = request.body.title;
 
+    if (!title) {
+        return response.send({
+            success: false,
+            message: "Title must be not empty."
+        })
+    }
+
+    const id = request.params.id;
+    const todo = await TodoObject.findOne({_id: id}).lean();
+    if (!todo) {
+        return response.send({
+            success: false,
+            message: "TodoObject not found."
+        });
+    }
+
+    try {
+        await TodoObject.updateOne(
+            {_id: id},
+            {
+                $set: {
+                    title
+                }
+            }
+        );
+
+        response.send({
+            success: true,
+            data: true,
+        });
+    } catch (e) {
+        response.send({
+            success: false,
+            message: e.message,
+        });
+    }
 }
 
-function del(request, response) {
+async function del(request, response) {
+    const id = request.params.id;
 
+    const todo = await TodoObject.findOne({_id: id}).lean();
+    if (!todo) {
+        return response.send({
+            success: false,
+            message: "Todo not found."
+        });
+    }
+
+    await TodoObject.deleteOne({_id: id});
+
+    response.send({
+        success: true,
+        data: true,
+    });
 }
 
 module.exports.get = get;
