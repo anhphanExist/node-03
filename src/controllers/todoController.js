@@ -26,21 +26,12 @@ async function list(request, response) {
 }
 
 async function create(request, response) {
-    const title = request.body.title;
-    if (!title) {
-        return response.send({
-            success: false,
-            message: "Title can't be empty."
-        });
-    }
     try {
-        const todo = new TodoObject({
-            title: title
-        });
-        const doc = await todo.save();
+        const todo = new TodoObject(request.body);
+        await todo.save();
         return response.send({
             success: true,
-            data: doc.toJSON(),
+            data: todo
         });
     } catch (err) {
         response.send({
@@ -119,11 +110,28 @@ async function del(request, response) {
     }
 }
 
+async function delAll(request, response) {
+    try {
+        await TodoObject.deleteMany();
+        response.send({
+            success: true,
+            message: `Delete Success`
+        });
+        await list(request,response);
+    } catch (err) {
+        response.send({
+           success: false,
+           message: `Delete Failed! Details: ${err.message}`
+        });
+    }
+}
+
 module.exports.get = get;
 module.exports.list = list;
 module.exports.create = create;
 module.exports.updateTitleOnly = updateTitleOnly;
 module.exports.updateStatusOnly = updateStatusOnly;
 module.exports.del = del;
+module.exports.delAll = delAll;
 
 
