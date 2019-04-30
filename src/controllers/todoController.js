@@ -36,7 +36,7 @@ async function list(request, response) {
 }
 
 async function create(request, response) {
-    const {title} = request.body;
+    const title = request.body.title;
 
     if (!title) {
         return response.send({
@@ -47,7 +47,7 @@ async function create(request, response) {
 
     try {
         const todo = new TodoObject({
-            title: "Hello"
+            title: title
         });
 
         const doc = await todo.save();
