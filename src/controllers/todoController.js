@@ -50,9 +50,9 @@ async function create(request, response) {
     }
 }
 
-async function update(request, response) {
-    const title = request.body.title;
-    if (!title) {
+async function updateTitleOnly(request, response) {
+    const newTitle = request.body.title;
+    if (!newTitle) {
         return response.send({
             success: false,
             message: "Title can't be empty."
@@ -62,8 +62,33 @@ async function update(request, response) {
         const id = request.params.id;
         const todo = await TodoObject.findByIdAndUpdate(
             {id},
-            {$set: {title}},
-            {new: true},
+            {$set: {
+                title: newTitle
+            }},
+            {new: true}
+        );
+        response.send({
+            success: true,
+            data: todo
+        });
+    } catch (err) {
+        response.send({
+            success: false,
+            message: `Update Failed! Details: ${err.message}`
+        });
+    }
+
+}
+
+async function updateStatusOnly(request, response) {
+    try {
+        const id = request.params.id;
+        const todo = await TodoObject.findByIdAndUpdate(
+            {id},
+            {$set: {
+                completed: !completed
+                }},
+            {new: true}
         );
         response.send({
             success: true,
@@ -79,8 +104,8 @@ async function update(request, response) {
 }
 
 async function del(request, response) {
-    const id = request.params.id;
     try {
+        const id = request.params.id;
         await TodoObject.findByIdAndDelete(id);
         response.send({
             success: true,
@@ -97,7 +122,8 @@ async function del(request, response) {
 module.exports.get = get;
 module.exports.list = list;
 module.exports.create = create;
-module.exports.update = update;
+module.exports.updateTitleOnly = updateTitleOnly;
+module.exports.updateStatusOnly = updateStatusOnly;
 module.exports.del = del;
 
 
