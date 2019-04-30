@@ -9,7 +9,8 @@ router.get("/", function (request, response) {
 router.post("/todos", todoController.create);
 router.get("/todos", todoController.list);
 router.get("/todos/:id", todoController.get);
-router.post("todos/:id", todoController.update);
+router.post("todos/:id", todoController.updateTitleOnly);
+router.post("todos/:id/toggle", todoController.updateStatusOnly);
 router.delete("todos/:id", todoController.del);
 
 module.exports = router;
